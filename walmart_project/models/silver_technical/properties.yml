@@ -1,0 +1,349 @@
+version: 2
+
+models:
+  - name: customers_t
+    description: >
+      Silver Technical customer model containing cleaned and incrementally
+      processed customer records from the Bronze customers source.
+      The model uses customer_id as the business key and
+      updated_timestamp to identify changed source records.
+
+    columns:
+      - name: customer_id
+        description: "Unique identifier for each customer"
+        data_tests:
+          - not_null
+          - unique
+
+      - name: first_name
+        description: "Customer first name"
+
+      - name: last_name
+        description: "Customer last name"
+
+      - name: email
+        description: "Customer email address"
+
+      - name: phone
+        description: "Customer phone number"
+
+      - name: city
+        description: "Customer city"
+
+      - name: province
+        description: "Customer province or state"
+
+      - name: country
+        description: "Customer country"
+
+      - name: created_timestamp
+        description: "Timestamp when the customer record was created"
+
+      - name: updated_timestamp
+        description: >
+          Source-system timestamp indicating when the customer record
+          was most recently updated. Used by the incremental model
+          to identify changed records.
+
+      - name: is_active
+        description: "Indicates whether the customer record is active"
+
+      - name: snapshot_updated_at
+        description: >
+          Timestamp used by the SCD Type 2 snapshot to determine
+          when a new customer version should be created.
+        data_tests:
+          - not_null
+
+      - name: processed_at
+        description: >
+          Timestamp indicating when the customer record was processed
+          by the Silver Technical model.
+
+  - name: employees_t
+    description: >
+      Silver Technical employee model containing cleaned and incrementally
+      processed employee records from the Bronze employees source.
+      The model uses employee_id as the business key and retains the
+      store relationship for downstream dimensional modeling.
+
+    columns:
+
+      - name: employee_id
+        description: "Unique identifier for each employee"
+        data_tests:
+          - not_null
+          - unique
+
+      - name: store_id
+        description: "Identifier of the store where the employee works"
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stores_t')
+                field: store_id
+
+      - name: first_name
+        description: "Employee first name"
+
+      - name: last_name
+        description: "Employee last name"
+
+      - name: email
+        description: "Employee email address"
+
+      - name: phone
+        description: "Employee phone number"
+
+      - name: job_title
+        description: "Employee job title"
+
+      - name: salary
+        description: "Employee salary"
+
+      - name: created_timestamp
+        description: "Timestamp when the employee record was created"
+
+      - name: updated_timestamp
+        description: >
+          Source-system timestamp indicating when the employee record
+          was most recently updated. Used by the incremental model
+          to identify changed records.
+
+      - name: is_active
+        description: "Indicates whether the employee record is active"
+
+      - name: processed_at
+        description: >
+          Timestamp indicating when the employee record was processed
+          by the Silver Technical model.
+
+  - name: products_t
+    description: >
+      Silver Technical product model containing cleaned and incrementally
+      processed product records from the Bronze products source.
+      The model uses product_id as the business key and tracks source
+      record changes using updated_timestamp.
+
+    columns:
+
+      - name: product_id
+        description: "Unique identifier for each product"
+        data_tests:
+          - not_null
+          - unique
+
+      - name: product_name
+        description: "Name of the product"
+
+      - name: category
+        description: "Product category"
+
+      - name: brand
+        description: "Product brand"
+
+      - name: price
+        description: "Current product price"
+
+      - name: created_timestamp
+        description: "Timestamp when the product record was created"
+
+      - name: updated_timestamp
+        description: >
+          Source-system timestamp indicating when the product record
+          was most recently updated. Used by the incremental model
+          to identify changed records.
+
+      - name: is_active
+        description: "Indicates whether the product record is active"
+
+      - name: snapshot_updated_at
+        description: >
+          Timestamp used by the SCD Type 2 snapshot to determine
+          when a new product version should be created.
+        data_tests:
+          - not_null
+
+      - name: processed_at
+        description: >
+          Timestamp indicating when the product record was processed
+          by the Silver Technical model.
+
+  - name: stores_t
+    description: >
+      Silver Technical store model containing cleaned and incrementally
+      processed store records from the Bronze stores source.
+      The model uses store_id as the business key and tracks source
+      record changes using updated_timestamp.
+
+    columns:
+
+      - name: store_id
+        description: "Unique identifier for each store"
+        data_tests:
+          - not_null
+          - unique
+
+      - name: store_name
+        description: "Name of the store"
+
+      - name: city
+        description: "Store city"
+
+      - name: province
+        description: "Store province or state"
+
+      - name: country
+        description: "Store country"
+
+      - name: created_timestamp
+        description: "Timestamp when the store record was created"
+
+      - name: updated_timestamp
+        description: >
+          Source-system timestamp indicating when the store record
+          was most recently updated. Used by the incremental model
+          to identify changed records.
+
+      - name: is_active
+        description: "Indicates whether the store record is active"
+
+      - name: snapshot_updated_at
+        description: >
+          Timestamp used by the SCD Type 2 snapshot to determine
+          when a new store version should be created.
+        data_tests:
+          - not_null
+
+      - name: processed_at
+        description: >
+          Timestamp indicating when the store record was processed
+          by the Silver Technical model.
+
+  - name: orders_t
+    description: >
+      Silver Technical order model containing cleaned and incrementally
+      processed order header records from the Bronze orders source.
+      The model uses order_id as the business key and retains customer
+      and store references for downstream business modeling.
+
+    columns:
+
+      - name: order_id
+        description: "Unique identifier for each order"
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: "Identifier of the customer who placed the order"
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('customers_t')
+                field: customer_id
+
+      - name: store_id
+        description: "Identifier of the store associated with the order"
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stores_t')
+                field: store_id
+
+      - name: order_timestamp
+        description: >
+          Timestamp when the order occurred. Used as the business-event
+          timestamp for point-in-time dimension lookups in the Gold fact.
+
+      - name: payment_method
+        description: "Payment method used for the order"
+
+      - name: order_status
+        description: "Current status of the order"
+
+      - name: total_amount
+        description: >
+          Total monetary amount of the order. Represents the order-level
+          total and is reconciled against the sum of its order-item amounts.
+
+      - name: created_timestamp
+        description: "Timestamp when the order record was created"
+
+      - name: updated_timestamp
+        description: >
+          Source-system timestamp indicating when the order record was
+          most recently updated. Used by the incremental model to identify
+          changed records.
+
+      - name: is_active
+        description: "Indicates whether the order record is active"
+
+      - name: processed_at
+        description: >
+          Timestamp indicating when the order record was processed
+          by the Silver Technical model.
+
+  - name: order_items_t
+    description: >
+      Silver Technical order-item model containing cleaned and incrementally
+      processed order line records from the Bronze order_items source.
+      The model uses order_item_id as the business key and retains order
+      and product references for downstream business modeling.
+
+    columns:
+
+      - name: order_item_id
+        description: "Unique identifier for each order item"
+        data_tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        description: "Identifier of the order containing the item"
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('orders_t')
+                field: order_id
+
+      - name: product_id
+        description: "Identifier of the product in the order item"
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('products_t')
+                field: product_id
+
+      - name: quantity
+        description: "Quantity of the product purchased"
+
+      - name: unit_price
+        description: "Price per unit for the order item"
+
+      - name: line_amount
+        description: >
+          Total monetary amount for the order item, calculated from
+          the quantity and unit price.
+
+      - name: created_timestamp
+        description: "Timestamp when the order-item record was created"
+
+      - name: updated_timestamp
+        description: >
+          Source-system timestamp indicating when the order-item record
+          was most recently updated. Used by the incremental model to
+          identify changed records.
+
+      - name: is_active
+        description: "Indicates whether the order-item record is active"
+
+      - name: processed_at
+        description: >
+          Timestamp indicating when the order-item record was processed
+          by the Silver Technical model.

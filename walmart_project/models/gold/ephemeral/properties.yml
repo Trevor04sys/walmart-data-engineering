@@ -1,0 +1,85 @@
+version: 2
+
+models:
+
+  - name: eph_customers
+    description: >
+      Ephemeral customer transformation used as an intermediate layer
+      between the Silver Technical customer model and the Gold customer
+      dimension. It prepares customer attributes and generates the
+      customer surrogate key used by downstream dimensional modeling.
+
+    columns:
+      - name: customer_id
+        description: "Business identifier of the customer."
+
+      - name: customer_sk
+        description: >
+          Surrogate key generated from the customer business identifier
+          and source update timestamp. Used to identify a specific
+          customer version in the dimensional model.
+
+
+  - name: eph_products
+    description: >
+      Ephemeral product transformation used as an intermediate layer
+      between the Silver Technical product model and the Gold product
+      dimension. It prepares product attributes and generates the
+      product surrogate key used by downstream dimensional modeling.
+
+    columns:
+      - name: product_id
+        description: "Business identifier of the product."
+
+      - name: product_sk
+        description: >
+          Surrogate key generated from the product business identifier
+          and source update timestamp.
+
+
+  - name: eph_stores
+    description: >
+      Ephemeral store transformation used as an intermediate layer
+      between the Silver Technical store model and the Gold store
+      dimension. It prepares store attributes and generates the
+      store surrogate key used by downstream dimensional modeling.
+
+    columns:
+      - name: store_id
+        description: "Business identifier of the store."
+
+      - name: store_sk
+        description: >
+          Surrogate key generated from the store business identifier
+          and source update timestamp.
+
+
+  - name: eph_employees
+    description: >
+      Ephemeral employee transformation used as an intermediate layer
+      between the Silver Technical employee model and the Gold employee
+      dimension. It prepares employee attributes and generates the
+      employee surrogate key used by downstream dimensional modeling.
+
+    columns:
+      - name: employee_id
+        description: "Business identifier of the employee."
+
+      - name: employee_sk
+        description: >
+          Surrogate key generated from the employee business identifier
+          and source update timestamp.
+
+
+  - name: eph_orders
+    description: >
+      Ephemeral order transformation that prepares order-level data from
+      OBT_B for the Gold order dimension. Because OBT_B is maintained at
+      order-item grain, this transformation reduces the data to one row
+      per order_id before downstream dimensional processing.
+
+    columns:
+      - name: order_id
+        description: >
+          Business identifier of the order. The ephemeral order model
+          reduces OBT_B from order-item grain to one row per order.

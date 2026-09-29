@@ -1,0 +1,69 @@
+version: 2
+
+models:
+
+  - name: obt_b
+    description: >
+      Silver Business One Big Table (OBT) combining order headers,
+      order items, customer attributes, product attributes, and store
+      attributes into a denormalized business-facing dataset.
+      The model is maintained at order-item grain, with one row per
+      order_item_id, and is used as the primary input for downstream
+      Gold dimensional and fact models.
+
+    columns:
+
+      - name: order_item_id
+        description: >
+          Unique identifier for the order line item and the grain-defining
+          key of OBT_B.
+
+      - name: order_id
+        description: >
+          Identifier of the order containing the order item.
+
+      - name: customer_id
+        description: >
+          Business identifier of the customer associated with the order.
+
+      - name: store_id
+        description: >
+          Business identifier of the store associated with the order.
+
+      - name: product_id
+        description: >
+          Business identifier of the product associated with the order item.
+
+      - name: order_timestamp
+        description: >
+          Timestamp when the order occurred. Used downstream for
+          point-in-time matching against SCD Type 2 dimension records.
+
+      - name: payment_method
+        description: >
+          Payment method used for the order.
+
+      - name: order_status
+        description: >
+          Status of the order.
+
+      - name: total_amount
+        description: >
+          Order-level total amount. Used for reconciliation against
+          the sum of line_amount values for the order.
+
+      - name: quantity
+        description: >
+          Quantity of the product purchased in the order item.
+
+      - name: unit_price
+        description: >
+          Price per unit for the product in the order item.
+
+      - name: line_amount
+        description: >
+          Monetary amount for the individual order item.
+
+      - name: obt_b_processed_at
+        description: >
+          Timestamp indicating when the OBT_B record was processed.

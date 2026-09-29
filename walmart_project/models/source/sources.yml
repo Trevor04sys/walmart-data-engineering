@@ -1,0 +1,220 @@
+version: 2
+
+sources:
+  - name: walmart_databricks
+    database: walmart_catalog
+    schema: bronze
+
+    description: >
+      Walmart source data ingested into the Bronze layer.
+      The source contains customer, employee, product, store,
+      order, and order-item data used by downstream dbt models.
+
+    tables:
+
+      - name: customers
+        description: >
+          Customer master data containing customer identity,
+          contact information, location, and source-system timestamps.
+        columns:
+          - name: customer_id
+            description: >
+              Business identifier for the customer.
+
+          - name: first_name
+            description: Customer first name.
+
+          - name: last_name
+            description: Customer last name.
+
+          - name: email
+            description: Customer email address.
+
+          - name: phone
+            description: Customer phone number.
+
+          - name: city
+            description: Customer city.
+
+          - name: province
+            description: Customer province or state.
+
+          - name: country
+            description: Customer country.
+
+          - name: created_timestamp
+            description: Timestamp when the customer record was created.
+
+          - name: updated_timestamp
+            description: Timestamp of the most recent source-system update.
+
+          - name: is_active
+            description: Indicates whether the customer record is active.
+
+
+      - name: employees
+        description: >
+          Employee master data containing employee information,
+          job details, salary, and store association.
+        columns:
+          - name: employee_id
+            description: Business identifier for the employee.
+
+          - name: store_id
+            description: Identifier of the store where the employee is associated.
+
+          - name: first_name
+            description: Employee first name.
+
+          - name: last_name
+            description: Employee last name.
+
+          - name: email
+            description: Employee email address.
+
+          - name: phone
+            description: Employee phone number.
+
+          - name: job_title
+            description: Employee job title.
+
+          - name: salary
+            description: Employee salary.
+
+          - name: created_timestamp
+            description: Timestamp when the employee record was created.
+
+          - name: updated_timestamp
+            description: Timestamp of the most recent source-system update.
+
+          - name: is_active
+            description: Indicates whether the employee record is active.
+
+
+      - name: orders
+        description: >
+          Order header data containing customer and store references,
+          order timing, payment method, status, and total order amount.
+        columns:
+          - name: order_id
+            description: Business identifier for the order.
+
+          - name: customer_id
+            description: Identifier of the customer who placed the order.
+
+          - name: store_id
+            description: Identifier of the store associated with the order.
+
+          - name: order_timestamp
+            description: Timestamp when the order occurred.
+
+          - name: payment_method
+            description: Payment method used for the order.
+
+          - name: order_status
+            description: Current status of the order.
+
+          - name: total_amount
+            description: Total monetary amount of the order.
+
+          - name: created_timestamp
+            description: Timestamp when the order record was created.
+
+          - name: updated_timestamp
+            description: Timestamp of the most recent source-system update.
+
+          - name: is_active
+            description: Indicates whether the order record is active.
+
+
+      - name: products
+        description: >
+          Product master data containing product name, category,
+          brand, pricing, and source-system timestamps.
+        columns:
+          - name: product_id
+            description: Business identifier for the product.
+
+          - name: product_name
+            description: Name of the product.
+
+          - name: category
+            description: Product category.
+
+          - name: brand
+            description: Product brand.
+
+          - name: price
+            description: Current product price.
+
+          - name: created_timestamp
+            description: Timestamp when the product record was created.
+
+          - name: updated_timestamp
+            description: Timestamp of the most recent source-system update.
+
+          - name: is_active
+            description: Indicates whether the product record is active.
+
+
+      - name: stores
+        description: >
+          Store master data containing store identity,
+          location, and source-system timestamps.
+        columns:
+          - name: store_id
+            description: Business identifier for the store.
+
+          - name: store_name
+            description: Name of the store.
+
+          - name: city
+            description: Store city.
+
+          - name: province
+            description: Store province or state.
+
+          - name: country
+            description: Store country.
+
+          - name: created_timestamp
+            description: Timestamp when the store record was created.
+
+          - name: updated_timestamp
+            description: Timestamp of the most recent source-system update.
+
+          - name: is_active
+            description: Indicates whether the store record is active.
+
+
+      - name: order_items
+        description: >
+          Order line-item data containing product references,
+          quantities, unit prices, and line-level amounts.
+        columns:
+          - name: order_item_id
+            description: Business identifier for the order line item.
+
+          - name: order_id
+            description: Identifier of the order containing the line item.
+
+          - name: product_id
+            description: Identifier of the product purchased.
+
+          - name: quantity
+            description: Quantity of the product purchased.
+
+          - name: unit_price
+            description: Price per unit for the line item.
+
+          - name: line_amount
+            description: Total monetary amount for the line item.
+
+          - name: created_timestamp
+            description: Timestamp when the order-item record was created.
+
+          - name: updated_timestamp
+            description: Timestamp of the most recent source-system update.
+
+          - name: is_active
+            description: Indicates whether the order-item record is active.

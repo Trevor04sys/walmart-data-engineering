@@ -1,0 +1,52 @@
+version: 2
+
+models:
+
+  - name: fact_orders
+    description: >
+      Gold fact table containing order-item level transactional measures
+      and surrogate keys for the customer, product, and store dimensions.
+      The model maintains one row per order_item_id and resolves
+      dimension versions using the order timestamp so that each fact
+      references the dimension record valid at the time of the order.
+      When no valid historical dimension version exists for the event,
+      the corresponding surrogate key is assigned the UNKNOWN member.
+
+    columns:
+
+      - name: order_item_id
+        description: >
+          Grain-defining key of the fact table. Each row represents
+          one order item.
+
+      - name: order_id
+        description: >
+          Identifier of the order containing the order item.
+
+      - name: customer_sk
+        description: >
+          Surrogate key identifying the customer dimension version
+          that was valid when the order occurred. Uses UNKNOWN when
+          no valid historical customer version exists.
+
+      - name: product_sk
+        description: >
+          Surrogate key identifying the product dimension version
+          that was valid when the order occurred. Uses UNKNOWN when
+          no valid historical product version exists.
+
+      - name: store_sk
+        description: >
+          Surrogate key identifying the store dimension version
+          that was valid when the order occurred. Uses UNKNOWN when
+          no valid historical store version exists.
+
+      - name: quantity
+        description: "Quantity of the product purchased."
+
+      - name: unit_price
+        description: "Price per unit for the order item."
+
+      - name: line_amount
+        description: >
+          Monetary amount for the individual order item.

@@ -1,0 +1,38 @@
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Airflow runtime files
+/logs/
+/airflow.db
+/airflow.cfg
+/webserver_config.py
+
+# dbt generated files
+walmart_project/target/
+walmart_project/dbt_packages/
+walmart_project/logs/
+walmart_project/.user.yml
+
+# Python test and cache files
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE and operating system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+walmart_project/profiles.yml
