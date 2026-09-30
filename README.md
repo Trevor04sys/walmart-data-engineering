@@ -1,315 +1,243 @@
-# Walmart Data Engineering Project
+# 🛒 Walmart Data Engineering Project
 
-An end-to-end data engineering project built using **Apache Airflow,
-dbt, Azure Databricks, and TigerData Cloud**. This project demonstrates
-data ingestion, incremental transformations, dimensional modeling, data
-quality testing, workflow orchestration, and Spark query optimization.
+An end-to-end data engineering pipeline built with **Apache Airflow**, **dbt**, **Azure Databricks**, and **TigerData Cloud**.
 
-## Project Overview
+It takes raw Walmart sales data and turns it into clean, analytics-ready tables using the **Medallion Architecture** (Bronze → Silver → Gold), with incremental loads, CDC, SCD Type 2 history, automated data quality tests, and Spark performance tuning.
 
-This project implements an end-to-end data pipeline using Walmart sales
-data. It follows the **Medallion Architecture** to transform raw source
-data into structured, analytics-ready datasets.
+---
 
-The source data consists of six CSV files containing customers,
-employees, orders, order items, products, and stores. A Python script
-loads these datasets into TigerData Cloud, a PostgreSQL database.
+## 📑 Table of Contents
 
-Apache Airflow orchestrates the pipeline, while Azure Databricks handles
-data ingestion and processing. dbt manages SQL transformations,
-snapshots, dimensional modeling, and data quality tests.
+- [What This Project Does](#-what-this-project-does)
+- [Key Features](#-key-features)
+- [Architecture](#-architecture)
+- [Tech Stack](#-tech-stack)
+- [Data Source and Ingestion](#-data-source-and-ingestion)
+- [Pipeline Steps](#-pipeline-steps)
+- [Data Modeling](#-data-modeling)
+- [Data Quality](#-data-quality)
+- [Delta Lake Experiments](#-delta-lake-experiments)
+- [Spark Optimization](#-spark-optimization)
+- [Airflow Monitoring](#-airflow-monitoring)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [CI/CD](#-cicd)
+- [Security](#-security)
+- [Project Status](#-project-status)
+- [Author](#-author)
 
-The project includes incremental processing, Change Data Capture (CDC),
-Slowly Changing Dimensions (SCD Type 2), and Delta Lake experiments.
+---
 
-## Key Features
+## 🎯 What This Project Does
 
--   End-to-end data pipeline using Apache Airflow, dbt, and Azure
-    Databricks.
--   PostgreSQL source database hosted on TigerData Cloud.
--   Python-based CSV ingestion using `psycopg2`.
--   Databricks ingestion and CDC processing.
--   Medallion Architecture with Bronze, Silver, and Gold layers.
--   Incremental data transformations using dbt.
--   Business-oriented data modeling using `obt_b`.
--   SCD Type 2 dimensional modeling using dbt snapshots.
--   Fact table modeling with historical dimension lookups.
--   Automated dbt data quality testing.
--   Delta Lake time travel and Change Data Feed experiments.
--   Spark query plan analysis and performance optimization.
--   Airflow task failure and DAG success email notifications.
--   Docker-based deployment.
--   Version control using Git and GitHub.
+1. **Loads** six Walmart CSV files (customers, employees, orders, order items, products, stores) into a PostgreSQL database on TigerData Cloud using a Python script.
+2. **Orchestrates** the whole workflow with Apache Airflow.
+3. **Ingests and processes** the data in Azure Databricks, including CDC (Change Data Capture).
+4. **Transforms** it with dbt through Bronze, Silver, and Gold layers.
+5. **Models** the final data as dimension tables (with full history via SCD Type 2) and a fact table.
+6. **Validates** everything with automated dbt tests.
 
-## Architecture
+---
 
-``` text
-                 Walmart CSV Dataset
-                         |
-                         v
-                 Python Data Loader
-                    (psycopg2)
-                         |
-                         v
-                 TigerData Cloud
-                   (PostgreSQL)
-                         |
-                         v
-                  Apache Airflow
-                  (Orchestration)
-                         |
-                         v
-              Databricks Ingestion
-                  (CDC Processing)
-                         |
-                         v
-                  Bronze Layer
-                         |
-                         v
-               Silver Technical
-              (Incremental Models)
-                         |
-                         v
-               Silver Business
-                     (obt_b)
-                         |
-                         v
-                   Gold Layer
-                    /      \\
-                   v        v
-              Dimensions  fact_orders
-                (SCD2)        |
-                   \\         /
-                    v       v
-                  Data Quality
-                     Tests
+## ✨ Key Features
+
+| Area | What's included |
+|---|---|
+| **Pipeline** | End-to-end flow using Airflow, dbt, and Databricks |
+| **Source database** | PostgreSQL hosted on TigerData Cloud |
+| **Ingestion** | Python CSV loader (`psycopg2`) and Databricks CDC processing |
+| **Architecture** | Medallion: Bronze, Silver, and Gold layers |
+| **Transformations** | Incremental dbt models |
+| **Business modeling** | `obt_b`, a business-ready table at the order-item grain |
+| **History tracking** | SCD Type 2 dimensions built with dbt snapshots |
+| **Fact modeling** | `fact_orders` with historical (point-in-time) dimension lookups |
+| **Testing** | Automated dbt data quality tests |
+| **Delta Lake** | Time travel and Change Data Feed experiments |
+| **Performance** | Spark query plan analysis and optimization |
+| **Monitoring** | Airflow email alerts for task failures and DAG success |
+| **Deployment** | Docker-based, with Git/GitHub version control |
+
+---
+
+## 🏗 Architecture
+
+```mermaid
+flowchart TD
+    A[Walmart CSV Dataset] --> B[Python Data Loader<br/>psycopg2]
+    B --> C[(TigerData Cloud<br/>PostgreSQL)]
+    C --> D[Databricks Ingestion<br/>CDC Processing]
+    D --> E[Bronze Layer]
+    E --> F[Silver Technical<br/>Incremental Models]
+    F --> G[Silver Business<br/>obt_b]
+    G --> H[Gold Layer]
+    H --> I[Dimensions<br/>SCD Type 2]
+    H --> J[fact_orders]
+    I --> K{{Data Quality Tests}}
+    J --> K
+
+    AF[[Apache Airflow<br/>Orchestration]] -. orchestrates .-> D
+    AF -. orchestrates .-> F
+    AF -. orchestrates .-> H
 ```
 
-Apache Airflow manages task dependencies and execution order. Databricks
-performs ingestion and data processing, while dbt manages
-transformations, snapshots, and testing.
+Airflow controls task order and dependencies. Databricks handles ingestion and processing. dbt handles transformations, snapshots, and tests.
 
-## Technology Stack
+---
 
-  Technology         Purpose
-  ------------------ ---------------------------------------------
-  Python             CSV ingestion and data loading
-  psycopg2           PostgreSQL database connectivity
-  TigerData Cloud    Managed PostgreSQL source database
-  Apache Airflow 3   Workflow orchestration
-  Docker Compose     Containerized deployment
-  Azure Databricks   Data ingestion and processing
-  Databricks SDK     Databricks integration
-  Delta Lake         Data storage, time travel, and CDC
-  dbt                SQL transformations, snapshots, and testing
-  PySpark            Distributed data processing
-  Git                Version control
-  GitHub             Source code hosting
+## 🧰 Tech Stack
 
-## Data Source and Ingestion
+| Technology | Purpose |
+|---|---|
+| Python | CSV ingestion and data loading |
+| psycopg2 | PostgreSQL connectivity |
+| TigerData Cloud | Managed PostgreSQL source database |
+| Apache Airflow 3 | Workflow orchestration |
+| Docker Compose | Containerized deployment |
+| Azure Databricks | Data ingestion and processing |
+| Databricks SDK | Databricks integration |
+| Delta Lake | Storage, time travel, and CDC |
+| dbt | SQL transformations, snapshots, and testing |
+| PySpark | Distributed data processing |
+| Git / GitHub | Version control and code hosting |
 
-The project uses six Walmart CSV datasets:
+---
 
--   Customers
--   Employees
--   Orders
--   Order Items
--   Products
--   Stores
+## 📥 Data Source and Ingestion
 
-A Python script, `load_walmart_data.py`, uses `psycopg2` to load the CSV
-files into the `raw` schema of a PostgreSQL database hosted on TigerData
-Cloud.
+**Datasets (6 CSV files):** Customers, Employees, Orders, Order Items, Products, Stores.
 
-The source database was initially hosted on Ghost. The data was
-subsequently migrated to TigerData, and the restored tables were
-validated against the original row counts.
+The script `load_walmart_data.py` uses `psycopg2` to load these files into the `raw` schema of a PostgreSQL database on TigerData Cloud.
 
-The migration included all six tables, with a total of **42,796 rows**.
+**Migration note:** The source database was originally hosted on Ghost, then migrated to TigerData. All six tables (**42,796 rows** in total) were restored and validated against the original row counts.
 
-The Python loader is intended for initial data loading. Subsequent
-pipeline ingestion and processing are handled by Databricks.
+> ⚠️ The Python loader is for the **initial load only**. After that, ingestion and processing are handled by Databricks.
 
-## Data Pipeline
+---
 
-The pipeline follows a sequence of ingestion, transformation, modeling,
-and validation tasks.
+## 🔄 Pipeline Steps
 
-1.  **Source data:** Walmart CSV files provide the initial datasets.
-2.  **Data loading:** Python loads the CSV files into the TigerData
-    PostgreSQL database.
-3.  **Data ingestion:** Databricks ingests source data and processes CDC
-    changes.
-4.  **Source freshness:** Checks the freshness of source data.
-5.  **Silver technical layer:** Applies incremental transformations to
-    the source tables.
-6.  **Data quality:** Runs dbt tests to validate transformed data.
-7.  **Silver business layer:** Builds `obt_b`, a business-oriented table
-    at the order-item grain.
-8.  **Ephemeral models:** Provides intermediate transformations for
-    downstream models.
-9.  **Snapshots:** Captures historical changes using dbt snapshots.
-10. **Gold dimensions:** Builds dimensional models using SCD Type 2.
-11. **Gold fact:** Builds `fact_orders` with historical dimension
-    lookups.
-12. **Final validation:** Runs data quality tests on the resulting
-    models.
+| # | Step | What happens |
+|---|---|---|
+| 1 | **Source data** | Walmart CSV files provide the raw datasets |
+| 2 | **Data loading** | Python loads the CSVs into TigerData PostgreSQL |
+| 3 | **Data ingestion** | Databricks ingests source data and processes CDC changes |
+| 4 | **Source freshness** | Checks that source data is up to date |
+| 5 | **Silver technical** | Incremental transformations on the source tables |
+| 6 | **Data quality** | dbt tests validate the transformed data |
+| 7 | **Silver business** | Builds `obt_b`, one row per order item |
+| 8 | **Ephemeral models** | Intermediate transformations for downstream models |
+| 9 | **Snapshots** | dbt snapshots capture historical changes |
+| 10 | **Gold dimensions** | Builds SCD Type 2 dimension tables |
+| 11 | **Gold fact** | Builds `fact_orders` with historical dimension lookups |
+| 12 | **Final validation** | Runs data quality tests on the resulting models |
 
-Airflow orchestrates the pipeline and manages task dependencies and
-execution order.
+Airflow manages the task dependencies and execution order for all of these.
 
-## Data Modeling
+---
 
-The project follows the Medallion Architecture, separating data
-processing into Bronze, Silver, and Gold layers.
+## 🧱 Data Modeling
 
-### Bronze Layer
+The project follows the **Medallion Architecture**:
 
-The Bronze layer stores ingested source data in Databricks. It serves as
-the initial layer for downstream transformations.
+### 🥉 Bronze: raw ingested data
+Stores ingested source data in Databricks. This is the starting point for all downstream transformations.
 
-### Silver Layer
+### 🥈 Silver: cleaned and business-ready data
 
-The Silver layer contains technical and business-oriented models.
+**Silver Technical** contains incremental dbt models for each source entity: Customers, Employees, Orders, Order Items, Products, and Stores.
 
-#### Silver Technical
+**Silver Business** contains `obt_b`, a business-oriented table that combines the relevant source entities. Its grain is **one row per order item**, and it feeds the dimensional and fact models.
 
-Contains incremental dbt models for the source entities:
+### 🥇 Gold: analytics-ready models
 
--   Customers
--   Employees
--   Orders
--   Order Items
--   Products
--   Stores
+**Dimensions**
 
-These models apply incremental processing to prepare the source data for
-downstream transformations.
+- `dim_customers`
+- `dim_employees`
+- `dim_orders`
+- `dim_products`
+- `dim_stores`
 
-#### Silver Business
+Dimensions use dbt snapshots to keep history with **SCD Type 2**. Each version has a validity period, so a fact record can point to the dimension version that was correct at that time.
 
-The Silver Business layer contains the `obt_b` model.
+**Fact table**
 
-`obt_b` combines relevant source entities into a business-oriented
-table. Its intended grain is **one row per order item**. It provides a
-consolidated dataset for downstream dimensional and fact modeling.
+`fact_orders` stores order-item-level records. It uses temporal joins, matching each fact to the dimension version valid at the time of the order.
 
-### Gold Layer
+---
 
-The Gold layer contains dimensional models and a fact table designed for
-analytical use.
+## ✅ Data Quality
 
-#### Dimensions
+dbt tests check the correctness and consistency of the data. They cover:
 
--   `dim_customers`
--   `dim_employees`
--   `dim_orders`
--   `dim_products`
--   `dim_stores`
+- Fact table grain and uniqueness
+- Dimension validity and overlapping historical records
+- Exactly one current record per customer in the customer dimension
+- Temporal consistency between facts and dimensions
+- Order total reconciliation
+- Business table grain
 
-The dimensions use dbt snapshots to maintain historical records using
-SCD Type 2. Historical versions are maintained with validity periods,
-allowing fact records to reference the appropriate dimension version.
+---
 
-#### Fact Table
+## 🔬 Delta Lake Experiments
 
-`fact_orders` stores order-item-level records and uses temporal joins to
-retrieve the appropriate historical dimension records.
+Hands-on experiments to explore Delta Lake:
 
-The model connects fact records to their corresponding dimensions using
-the relevant validity periods.
+- **Time travel:** query previous versions of a table
+- **Change Data Feed (CDF):** inspect row-level changes (enabled on the customers technical table)
+- **Schema evolution:** automatic schema merging
+- **Table history:** analyzing the Delta history log
+- **File layout and optimization**
 
-## Data Quality
+---
 
-Data quality is implemented using dbt tests to validate the correctness
-and consistency of the transformed data.
+## ⚡ Spark Optimization
 
-The project includes tests for:
+Experiments used Databricks query plans and query profiles to study:
 
--   Fact table grain and uniqueness.
--   Dimension validity and overlapping historical records.
--   Exactly one current customer dimension record.
--   Temporal consistency between facts and dimensions.
--   Order total reconciliation.
--   Business table grain.
+- Column pruning
+- Predicate pushdown
+- Join strategies (broadcast joins vs. sort-merge joins)
+- Aggregation plans
+- Delta table details
+- Query profile comparisons
 
-These tests help ensure that the dimensional models and fact table
-maintain the expected structure and relationships.
+Full notes and observations: [`walmart_project/spark-optimization.md`](walmart_project/spark-optimization.md)
 
-## Delta Lake Experiments
+---
 
-The project includes practical experiments with Delta Lake to explore
-its data management capabilities.
+## 📡 Airflow Monitoring
 
-The experiments cover:
+Airflow runs and monitors the pipeline. The `orchestrate` DAG coordinates the ingestion and transformation tasks.
 
--   Time travel to query previous table versions.
--   Change Data Feed (CDF) to inspect data changes.
--   Schema evolution using automatic schema merging.
--   Delta table history analysis.
--   File layout and optimization experiments.
-
-CDF was enabled on the customers technical table for the experiment.
-
-## Spark Optimization
-
-Spark optimization experiments were performed using Databricks query
-plans and query profiles.
-
-The experiments covered:
-
--   Column pruning
--   Predicate pushdown
--   Join strategies
--   Broadcast joins
--   Sort-merge joins
--   Aggregation plans
--   Delta table details
--   Query profile comparisons
-
-The experiments and observations are documented in
-[`walmart_project/spark-optimization.md`](walmart_project/spark-optimization.md).
-
-## Airflow Monitoring
-
-Apache Airflow is used to orchestrate and monitor pipeline execution.
-
-The project includes:
-
--   Task retries
--   Task failure email notifications
--   DAG success email notifications
--   Task execution status and logs
+- Task retries
+- Email notification on task failure
+- Email notification on DAG success
+- Task status and logs in the Airflow UI
 
 Email notifications are configured through Airflow connections.
 
-The `orchestrate` DAG coordinates the pipeline's ingestion and
-transformation tasks.
+---
 
-## Project Structure
+## 📁 Project Structure
 
-``` text
+```text
 walmart-data-engineering/
-│
 ├── config/
 │   └── airflow.cfg
-│
 ├── dags/
-│   └── orchestrate.py
-│
+│   └── orchestrate.py              # Main Airflow DAG
 ├── walmart_dataset/
-│   ├── data/
+│   ├── data/                       # Six source CSV files
 │   │   ├── customers.csv
 │   │   ├── employees.csv
 │   │   ├── orders.csv
 │   │   ├── order_items.csv
 │   │   ├── products.csv
 │   │   └── stores.csv
-│   │
 │   └── ddl/
 │       └── walmart_schema.sql
-│
-├── walmart_project/
+├── walmart_project/                # dbt project
 │   ├── models/
 │   │   ├── source/
 │   │   ├── silver_technical/
@@ -317,19 +245,16 @@ walmart-data-engineering/
 │   │   └── gold/
 │   │       ├── ephemeral/
 │   │       └── fact/
-│   │
 │   ├── snapshots/
 │   ├── tests/
 │   ├── macros/
 │   ├── analyses/
 │   ├── seeds/
-│   │
 │   ├── dbt_project.yml
 │   ├── packages.yml
 │   ├── profiles.yml
 │   └── spark-optimization.md
-│
-├── load_walmart_data.py
+├── load_walmart_data.py            # Initial CSV loader
 ├── Dockerfile
 ├── docker-compose.yaml
 ├── requirements.txt
@@ -337,119 +262,87 @@ walmart-data-engineering/
 └── README.md
 ```
 
-Local environment files and database credentials are excluded from
-version control.
+Local environment files and database credentials are excluded from version control.
 
-## Prerequisites
+---
 
--   Docker and Docker Compose
--   Python
--   An Azure Databricks workspace
--   A Databricks SQL warehouse
--   A Databricks access token
--   A TigerData Cloud PostgreSQL database
--   Git
+## 🚀 Getting Started
 
-## Setup
+### Prerequisites
 
-### 1. Clone the Repository
+- Docker and Docker Compose
+- Python
+- Git
+- An Azure Databricks workspace, a SQL warehouse, and an access token
+- A TigerData Cloud PostgreSQL database
 
-``` bash
+### 1. Clone the repository
+
+```bash
 git clone https://github.com/Trevor04sys/walmart-data-engineering.git
 cd walmart-data-engineering
 ```
 
-### 2. Configure Environment Variables
+### 2. Set environment variables
 
-Create a local `.env` file for environment-specific configuration.
+Create a local `.env` file and add the required Airflow and Databricks settings. If you plan to run the initial CSV loader, also add your TigerData connection string as `DATABASE_URL`.
 
-Configure the required Airflow and Databricks settings. Add the
-TigerData PostgreSQL connection string as `DATABASE_URL` if you intend
-to run the initial CSV loading script.
-
-Do not commit `.env` or expose credentials in the repository.
+> 🔒 Never commit `.env` or expose credentials in the repository.
 
 ### 3. Configure dbt
 
-Configure the Databricks connection in:
+Set up the Databricks connection in `walmart_project/profiles.yml`. Use environment variables for credentials instead of hardcoding secrets, and make sure your Databricks environment has access to the needed catalogs, schemas, and tables.
 
-``` text
-walmart_project/profiles.yml
-```
+### 4. Load the source data (first-time setup only)
 
-Use environment variables for credentials rather than committing
-secrets.
+If your source database is empty, run:
 
-Ensure that the configured Databricks environment has access to the
-required catalogs, schemas, and tables.
-
-### 4. Load the Source Data
-
-If you are setting up the project with an empty source database, run:
-
-``` bash
+```bash
 python load_walmart_data.py
 ```
 
-The script loads the CSV files into the corresponding tables in the
-`raw` schema.
+This loads the CSVs into the matching tables in the `raw` schema.
 
-This is an initial-load operation. Do not rerun it against an already
-populated database without preparing the tables first.
+> ⚠️ This is an initial-load operation. Don't rerun it on an already populated database without preparing the tables first.
 
 ### 5. Start Airflow
 
-From the project root, run:
-
-``` bash
+```bash
 docker compose up -d --build
+docker compose ps        # check that containers are running
 ```
 
-Check the running containers:
+### 6. Run the pipeline
 
-``` bash
-docker compose ps
-```
+Open the Airflow web UI (using the port set in `docker-compose.yaml`), then enable and trigger the **`orchestrate`** DAG.
 
-### 6. Access Airflow
+---
 
-Open the Airflow web interface using the port configured in
-`docker-compose.yaml`.
+## 🔁 CI/CD
 
-Enable and trigger the `orchestrate` DAG to execute the pipeline.
+GitHub Actions was explored for automated dbt validation and testing, but **CI/CD is not currently set up**. Pipeline execution and validation happen through the Airflow and Databricks environment.
 
-The DAG coordinates the ingestion and transformation workflow.
+---
 
-## CI/CD
+## 🔐 Security
 
-GitHub Actions was explored for automated dbt validation and testing.
-However, CI/CD is not currently configured in this project.
+- Do not commit credentials or access tokens.
+- Local environment files are excluded via `.gitignore`.
+- Databricks connection settings should use environment variables.
+- Manage database credentials securely.
+- In production, use a proper secrets management solution.
 
-Pipeline execution and validation are performed through the Airflow and
-Databricks environment.
+---
 
-## Security
+## 📌 Project Status
 
--   Credentials and access tokens must not be committed.
--   Local environment files are excluded using `.gitignore`.
--   Databricks connection settings should use environment variables.
--   Database credentials should be managed securely.
--   Production credentials should be stored using an appropriate secrets
-    management solution.
+The end-to-end pipeline has been run successfully. It covers source data migration to TigerData, Databricks ingestion, dbt transformations, dimensional modeling, data quality tests, and Airflow orchestration.
 
-## Project Status
+Possible next step: automated CI/CD.
 
-The end-to-end pipeline has been executed successfully.
+---
 
-The project includes source data migration to TigerData, Databricks
-ingestion, dbt transformations, dimensional modeling, data quality
-tests, and Airflow orchestration.
-
-Additional enhancements, such as automated CI/CD, can be considered
-separately.
-
-## Author
+## 👤 Author
 
 **Raj Pramalick**
-
-Data Engineering \| Azure Databricks \| dbt \| Apache Airflow \| PySpark
+Data Engineering | Azure Databricks | dbt | Apache Airflow | PySpark
