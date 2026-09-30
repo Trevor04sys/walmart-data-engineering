@@ -2,7 +2,7 @@ from airflow.sdk import dag, task
 from airflow.providers.standard.operators.bash import BashOperator
 from databricks.sdk import WorkspaceClient
 from airflow.utils.email import send_email
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import time
 
@@ -56,6 +56,10 @@ def dag_success_email(context):
 
 
 @dag(
+    schedule="0 13 * * *",
+    start_date=datetime(2026, 10, 1, tzinfo=timezone.utc),
+    end_date=datetime(2026, 10, 31, 23, 59, tzinfo=timezone.utc),
+    catchup=True,
     default_args={
         "retries": 2,
         "retry_delay": timedelta(minutes=5),
